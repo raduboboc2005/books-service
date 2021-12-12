@@ -1,0 +1,275 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: Books Service Api
+tags:
+  - name: Books
+    description: Books CRUD
+paths:
+  '/books':
+    put:
+      summary: Update book
+      operationId: updateBookDetails
+      tags:
+        - Books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDTO'
+      responses:
+        '200':
+          description: Updated book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    get:
+      summary: Get the list of books
+      operationId: getBooks
+      tags:
+        - Books
+      responses:
+        '200':
+          description: List of books
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDTOList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    post:
+      summary: Add new book
+      operationId: addBook
+      tags:
+        - Books
+      requestBody:
+        description: Add book
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookDTO'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+  '/books/{isbn}':
+    get:
+      summary: Get book details by isbn
+      parameters:
+        - $ref: '#/components/parameters/BookISBN'
+      tags:
+        - Books
+      operationId: getBookDetails
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDTO'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    patch:
+      summary: Update book stock number of copies by isbn
+      operationId: updateBookStockCopies
+      tags:
+        - Books
+      parameters:
+        - $ref: '#/components/parameters/BookISBN'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockCopies'
+      responses:
+        '204':
+          description: No content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+    delete:
+      summary: Delete book with specified Id
+      tags:
+        - Books
+      parameters:
+        - $ref: '#/components/parameters/BookISBN'
+      operationId: deleteBook
+      responses:
+        '200':
+          description: Ok
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/DefaultError'
+components:
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    DefaultError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnauthorizedError:
+      description: Authorization header is missing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ForbiddenError:
+      description: The specified resource is forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    BookISBN:
+      name: isbn
+      in: path
+      description: The id of the book
+      required: true
+      schema:
+        type: string
+  schemas:
+    StockCopies:
+      type: object
+      description: Number of book copies in stock
+      properties:
+        stockCopies:
+          type: integer
+          description: Number of copies
+    Title:
+      type: string
+      description: Title of the book
+    BookDTOList:
+      type: object
+      description: List of books
+      properties:
+        books:
+          type: array
+          description: The list of books
+          items:
+            $ref: '#/components/schemas/BookDTO'
+    BookDTO:
+      type: object
+      description: Book
+      required:
+        - isbn
+        - title
+        - author
+        - stockCopies
+      properties:
+        isbn:
+          type: string
+          description: Book unique identifier
+        title:
+          type: string
+          description: The title of the book
+        author:
+          type: string
+          description: The name of the author
+        stockCopies:
+          type: integer
+          description: Number of copies in stock
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: A list of errors
+          items:
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      required:
+        - httpStatusCode
+        - customCode
+        - message
+      properties:
+        httpStatusCode:
+          type: integer
+          minimum: 100
+          maximum: 599
+          description: HTTP Status code for error
+        customCode:
+          type: string
+          description: Application specific error code
+        message:
+          type: string
+          description: Short message describing cause of error
+        description:
+          type: string
+          description: Details error description
+        errorHelpUrl:
+          type: string
+          description: >-
+            URL to page containing rich error description and resolution
+            examples
+        moreInfo:
+          type: string
+          description: More details describing error
